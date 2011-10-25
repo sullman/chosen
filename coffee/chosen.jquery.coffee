@@ -367,6 +367,22 @@ class Chosen extends AbstractChosen
       @form_field_jq.trigger "change", {'selected': @form_field.options[item.options_index].value} if @is_multiple || @form_field_jq.val() != @current_value
       @current_value = @form_field_jq.val()
       this.search_field_scale()
+    else if @options.allow_option_creation
+      new_option = @search_field.val()
+      return unless new_option
+      if @allow_creation(new_option)
+        $('<option>', {selected: true, value: new_option}).text(new_option).appendTo(@form_field_jq)
+        @results_update_field(evt)
+      @search_field.val("")
+      @results_hide()
+
+  allow_creation: (new_option) ->
+    if @is_multiple
+      matches = @search_choices.find("li.search-choice span").filter ->
+        $(this).text().toLowerCase() == new_option.toLowerCase()
+      !matches.length
+    else
+      @selected_item.find('span').text().toLowerCase() != new_option.toLowerCase()
 
   result_activate: (el) ->
     el.addClass("active-result")
@@ -400,6 +416,7 @@ class Chosen extends AbstractChosen
     regexAnchor = if @search_contains then "" else "^"
     regex = new RegExp(regexAnchor + searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
     zregex = new RegExp(searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
+    fregex = new RegExp("^#{searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]}/g, "\\$&")}$", 'i')
 
     for option in @results_data
       if not option.disabled and not option.empty
@@ -410,7 +427,11 @@ class Chosen extends AbstractChosen
           result_id = option.dom_id
           result = $("#" + result_id)
 
-          if regex.test option.html
+          if @options.allow_option_creation && searchText && fregex.test(option.html)
+            found = true
+            results += 1
+            @result_do_highlight($('#' + option.dom_id))
+          else if regex.test option.html
             found = true
             results += 1
           else if option.html.indexOf(" ") >= 0 or option.html.indexOf("[") == 0
@@ -440,7 +461,8 @@ class Chosen extends AbstractChosen
 
     if results < 1 and searchText.length
       this.no_results searchText
-    else
+      @results_hide() if @options.allow_option_creation && @is_multiple
+    else if not @options.allow_option_creation
       this.winnow_results_set_highlight()
 
   winnow_results_clear: ->
@@ -463,6 +485,7 @@ class Chosen extends AbstractChosen
       this.result_do_highlight do_high if do_high?
 
   no_results: (terms) ->
+    return if !@is_multiple && @options.allow_option_creation
     no_results_html = $('<li class="no-results">' + @results_none_found + ' "<span></span>"</li>')
     no_results_html.find("span").first().html(terms)
 
