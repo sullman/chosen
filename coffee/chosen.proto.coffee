@@ -365,6 +365,7 @@ class Chosen extends AbstractChosen
       if @allow_creation(new_option)
         @form_field.insert(Element('option', {selected: true, value: new_option}).update(new_option))
         @results_update_field(evt)
+      @form_field.simulate("change") if typeof Event.simulate is 'function'
       @search_field.value = ""
       @results_hide()
 
@@ -408,9 +409,10 @@ class Chosen extends AbstractChosen
 
     searchText = if @search_field.value is @default_text then "" else @search_field.value.strip().escapeHTML()
     regexAnchor = if @search_contains then "" else "^"
-    regex = new RegExp(regexAnchor + searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
-    zregex = new RegExp(searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"), 'i')
-    fregex = new RegExp("^#{searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]}/g, "\\$&")}$", 'i')
+    textToSearch = searchText.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+    regex = new RegExp(regexAnchor + textToSearch, 'i')
+    zregex = new RegExp(textToSearch, 'i')
+    fregex = new RegExp("^" + textToSearch + "$", 'i')
 
     for option in @results_data
       if not option.disabled and not option.empty
