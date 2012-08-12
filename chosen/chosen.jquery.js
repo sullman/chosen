@@ -336,7 +336,7 @@ Copyright (c) 2011 by Harvest
       container_div = $("<div />", {
         id: this.container_id,
         "class": "chzn-container" + (this.is_rtl ? ' chzn-rtl' : ''),
-        style: 'width: ' + this.f_width + 'px;'
+        style: 'width: ' + (this.form_field_jq[0].style.width || (this.f_width + 'px')) + ';'
       });
       if (this.is_multiple) {
         container_div.html('<ul class="chzn-choices"><li class="search-field"><input type="text" value="' + this.default_text + '" class="default" autocomplete="off" style="width:25px;" /></li></ul><div class="chzn-drop" style="left:-9000px;"><ul class="chzn-results"></ul></div>');
@@ -445,7 +445,7 @@ Copyright (c) 2011 by Harvest
     Chosen.prototype.container_mousedown = function(evt) {
       var target_closelink;
       if (!this.is_disabled) {
-        target_closelink = evt != null ? ($(evt.target)).hasClass("search-choice-close") : false;
+        target_closelink = evt != null ? ($(evt.target)).parent().hasClass("search-choice-close") : false;
         if (evt && evt.type === "mousedown" && !this.results_showing) {
           evt.stopPropagation();
         }
@@ -694,7 +694,7 @@ Copyright (c) 2011 by Harvest
       }
       choice_id = this.container_id + "_c_" + item.array_index;
       this.choices += 1;
-      this.search_container.before('<li class="search-choice" id="' + choice_id + '"><span>' + item.html + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>');
+      this.search_container.before('<li class="search-choice" id="' + choice_id + '"><span>' + item.html + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"><i class="icon-remove"></i></a></li>');
       link = $('#' + choice_id).find("a").first();
       return link.click(function(evt) {
         return _this.choice_destroy_link_click(evt);
@@ -705,7 +705,7 @@ Copyright (c) 2011 by Harvest
       evt.preventDefault();
       if (!this.is_disabled) {
         this.pending_destroy_click = true;
-        return this.choice_destroy($(evt.target));
+        return this.choice_destroy($(evt.currentTarget));
       } else {
         return evt.stopPropagation;
       }

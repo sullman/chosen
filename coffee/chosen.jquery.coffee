@@ -34,7 +34,7 @@ class Chosen extends AbstractChosen
     container_div = ($ "<div />", {
       id: @container_id
       class: "chzn-container#{ if @is_rtl then ' chzn-rtl' else '' }"
-      style: 'width: ' + (@f_width) + 'px;' #use parens around @f_width so coffeescript doesn't think + ' px' is a function parameter
+      style: 'width: ' + (@form_field_jq[0].style.width || ((@f_width) + 'px')) + ';' #use parens around @f_width so coffeescript doesn't think + ' px' is a function parameter
     })
 
     if @is_multiple
@@ -107,7 +107,7 @@ class Chosen extends AbstractChosen
 
   container_mousedown: (evt) ->
     if !@is_disabled
-      target_closelink =  if evt? then ($ evt.target).hasClass "search-choice-close" else false
+      target_closelink =  if evt? then ($ evt.target).parent().hasClass "search-choice-close" else false
       if evt and evt.type is "mousedown" and not @results_showing
         evt.stopPropagation()
       if not @pending_destroy_click and not target_closelink
@@ -299,7 +299,7 @@ class Chosen extends AbstractChosen
       return false # fire event
     choice_id = @container_id + "_c_" + item.array_index
     @choices += 1
-    @search_container.before  '<li class="search-choice" id="' + choice_id + '"><span>' + item.html + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"></a></li>'
+    @search_container.before  '<li class="search-choice" id="' + choice_id + '"><span>' + item.html + '</span><a href="javascript:void(0)" class="search-choice-close" rel="' + item.array_index + '"><i class="icon-remove"></i></a></li>'
     link = $('#' + choice_id).find("a").first()
     link.click (evt) => this.choice_destroy_link_click(evt)
 
@@ -307,7 +307,7 @@ class Chosen extends AbstractChosen
     evt.preventDefault()
     if not @is_disabled
       @pending_destroy_click = true
-      this.choice_destroy $(evt.target)
+      this.choice_destroy $(evt.currentTarget)
     else
       evt.stopPropagation
 
