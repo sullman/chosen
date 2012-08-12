@@ -237,9 +237,11 @@ class Chosen extends AbstractChosen
       @form_field_jq.trigger("liszt:maxselected", {chosen: this})
       return false
 
+    @f_width = @form_field_jq.outerWidth()
     dd_top = if @is_multiple then @container.height() else (@container.height() - 1)
+    dd_width = (@f_width - get_side_border_padding(@dropdown))
     @form_field_jq.trigger("liszt:showing_dropdown", {chosen: this})
-    @dropdown.css {"top":  dd_top + "px", "left":0}
+    @dropdown.css {"top":  dd_top + "px", "width": dd_width + "px", "left":0}
     @results_showing = true
 
     @search_field.focus()
